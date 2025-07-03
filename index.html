@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <title>KartRiderPacket</title>
+  <!-- MDUI CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mdui@1.0.1/dist/css/mdui.min.css">
+  <style>
+    body {
+      background-color: #121212;
+      color: white;
+    }
+    .mdui-card {
+      margin-bottom: 16px;
+      background-color: #1e1e1e;
+    }
+    .search-bar {
+      margin: 20px 0;
+    }
+  </style>
+</head>
+<body class="mdui-theme-layout-dark mdui-container">
+
+  <div id="app">
+    <h1 class="mdui-typo-display-1">KartRiderPacket</h1>
+
+    <div class="mdui-textfield search-bar">
+      <label class="mdui-textfield-label">EnterPacketName</label>
+      <input class="mdui-textfield-input" type="text" v-model="searchQuery" placeholder="ex GoLucci">
+    </div>
+
+    <div v-for="(value, key) in filteredPackets" :key="key" class="mdui-card">
+      <div class="mdui-card-primary">
+        <div class="mdui-card-primary-title">{{ key }}</div>
+        <div class="mdui-card-primary-subtitle">ID：{{ value }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Vue 2 CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.min.js"></script>
+  <!-- MDUI JS -->
+  <script src="https://cdn.jsdelivr.net/npm/mdui@1.0.1/dist/js/mdui.min.js"></script>
+
+  <!-- 主邏輯 -->
+  <script>
+    new Vue({
+      el: '#app',
+      data: {
+        packets: {},
+        searchQuery: ''
+      },
+      computed: {
+        filteredPackets() {
+          const query = this.searchQuery.trim().toLowerCase();
+          if (!query) return this.packets;
+          return Object.keys(this.packets)
+            .filter(key => key.toLowerCase().includes(query))
+            .reduce((res, key) => {
+              res[key] = this.packets[key];
+              return res;
+            }, {});
+        }
+      },
+      mounted() {
+        fetch('packet.json')
+          .then(res => res.json())
+          .then(data => {
+            this.packets = data;
+          })
+          .catch(err => {
+            console.error('讀取 JSON 發生錯誤:', err);
+          });
+      }
+    });
+  </script>
+</body>
+</html>
